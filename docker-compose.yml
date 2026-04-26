@@ -1,0 +1,35 @@
+services:
+  foundation-stereo:
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    build:
+      context: ../..
+      dockerfile: thirdparty/FoundationStereo/Dockerfile
+    image: 3dgs_pipe:foundation-stereo
+    network_mode: "host"
+    shm_size: 8gb
+    working_dir: /3dgs_pipe/thirdparty/FoundationStereo
+    environment:
+      - HF_HOME=/root/.cache/huggingface
+      - SOURCE_FOLDER_PATH=${SOURCE_FOLDER_PATH:-}
+    volumes:
+      - type: bind
+        source: ../..
+        target: /3dgs_pipe
+      - type: bind
+        source: ${TORCH_CACHE_PATH:-../../torch_cache}
+        target: /root/.cache
+      - type: bind
+        source: ${SOURCE_FOLDER_PATH:-../../}
+        target: /workspace/source_folder
+    gpus:
+      - driver: nvidia
+        count: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
